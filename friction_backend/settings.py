@@ -69,7 +69,14 @@ WSGI_APPLICATION = 'friction_backend.wsgi.application'
 # ============================================
 
 # Use DATABASE_URL if provided (Render), otherwise use .env
+# ============================================
+# DATABASE CONFIGURATION
+# ============================================
+
+
+
 if os.getenv('DATABASE_URL'):
+    # Production on Render - use DATABASE_URL
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
@@ -78,6 +85,7 @@ if os.getenv('DATABASE_URL'):
         )
     }
 else:
+    # Local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -87,15 +95,12 @@ else:
             'HOST': os.getenv('DB_HOST', 'mysql-2b5c661-primeforthekms-9d62.d.aivencloud.com'),
             'PORT': os.getenv('DB_PORT', '18669'),
             'OPTIONS': {
-                'ssl': {
-                    'ca': os.path.join(BASE_DIR, 'ca.pem'),
-                } if os.path.exists(os.path.join(BASE_DIR, 'ca.pem')) else {},
+                'ssl': {'ca': os.path.join(BASE_DIR, 'ca.pem')} if os.path.exists(os.path.join(BASE_DIR, 'ca.pem')) else {},
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',
             },
         }
     }
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
