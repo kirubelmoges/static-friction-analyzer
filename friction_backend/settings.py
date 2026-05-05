@@ -69,12 +69,6 @@ WSGI_APPLICATION = 'friction_backend.wsgi.application'
 # ============================================
 
 # Use DATABASE_URL if provided (Render), otherwise use .env
-# ============================================
-# DATABASE CONFIGURATION
-# ============================================
-
-
-
 if os.getenv('DATABASE_URL'):
     # Production on Render - use DATABASE_URL
     DATABASES = {
