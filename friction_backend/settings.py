@@ -68,9 +68,26 @@ WSGI_APPLICATION = 'friction_backend.wsgi.application'
 # DATABASE CONFIGURATION
 # ============================================
 
-# Use DATABASE_URL if provided (Render), otherwise use .env
-if os.getenv('DATABASE_URL'):
-    # Production on Render - use DATABASE_URL
+# ============================================
+# DATABASE CONFIGURATION
+# ============================================
+
+if os.getenv('DB_HOST'):  # Using individual variables
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
+            'OPTIONS': {
+                'ssl': {'ssl-mode': 'REQUIRED'} if os.getenv('DB_SSL_MODE') else {},
+            },
+        }
+    }
+elif os.getenv('DATABASE_URL'):  # Fallback to DATABASE_URL
+    import dj_database_url
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
@@ -79,7 +96,7 @@ if os.getenv('DATABASE_URL'):
         )
     }
 else:
-    # Local development
+    # Local development (keep your existing local config)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
