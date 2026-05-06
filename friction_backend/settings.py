@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,14 +65,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'friction_backend.wsgi.application'
 
 # ============================================
-# DATABASE CONFIGURATION
+# DATABASE CONFIGURATION - CLOUD FIRST
 # ============================================
 
-# ============================================
-# DATABASE CONFIGURATION
-# ============================================
-
-if os.getenv('DB_HOST'):  # Using individual variables
+if os.getenv('DATABASE_URL'):
+    # Priority 1: Cloud database via DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+elif os.getenv('DB_HOST'):
+    # Priority 2: Individual variables (fallback)
     DATABASES = {
         'default': {
             'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
@@ -86,32 +92,15 @@ if os.getenv('DB_HOST'):  # Using individual variables
             },
         }
     }
-elif os.getenv('DATABASE_URL'):  # Fallback to DATABASE_URL
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
 else:
-    # Local development (keep your existing local config)
+    # Priority 3: Local SQLite for development (no database server needed)
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('DB_NAME', 'defaultdb'),
-            'USER': os.getenv('DB_USER', 'avnadmin'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST', 'mysql-2b5c661-primeforthekms-9d62.d.aivencloud.com'),
-            'PORT': os.getenv('DB_PORT', '18669'),
-            'OPTIONS': {
-                'ssl': {'ca': os.path.join(BASE_DIR, 'ca.pem')} if os.path.exists(os.path.join(BASE_DIR, 'ca.pem')) else {},
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-                'charset': 'utf8mb4',
-            },
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
