@@ -13,7 +13,7 @@ django.setup()
 from api.models import Measurement, LiveData
 
 class ArduinoSerialReader:
-    def __init__(self, port='COM3', baudrate=9600):
+    def __init__(self, port='COM4', baudrate=9600):
         self.port = port
         self.baudrate = baudrate
         self.serial_connection = None
