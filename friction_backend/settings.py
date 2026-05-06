@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-BASE_DIR = Path(__file__resolve()).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # ← FIXED THIS LINE
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-change-in-production')
