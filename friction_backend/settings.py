@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__resolve()).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-change-in-production')
@@ -65,14 +65,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'friction_backend.wsgi.application'
 
 # ============================================
-# DATABASE CONFIGURATION - CLOUD FIRST
+# DATABASE CONFIGURATION - FIXED FOR AIVEN
 # ============================================
 
+def get_database_url():
+    """Get DATABASE_URL and fix Aiven's ssl-mode parameter"""
+    url = os.getenv('DATABASE_URL')
+    if url and '?ssl-mode=' in url:
+        # Change ssl-mode to ssl_mode (hyphen to underscore)
+        url = url.replace('?ssl-mode=', '?ssl_mode=')
+    return url
+
 if os.getenv('DATABASE_URL'):
-    # Priority 1: Cloud database via DATABASE_URL
+    # Fix the URL before passing to dj_database_url
+    database_url = get_database_url()
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
+            default=database_url,
             conn_max_age=600,
             conn_health_checks=True,
         )
@@ -93,7 +102,7 @@ elif os.getenv('DB_HOST'):
         }
     }
 else:
-    # Priority 3: Local SQLite for development (no database server needed)
+    # Priority 3: Local SQLite for development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
